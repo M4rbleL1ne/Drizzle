@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
@@ -87,7 +87,22 @@ public sealed partial class LingoGlobal
 
         public string String { get; }
 
-        public string this[int idx] => String[idx - 1].ToString();
+        public string this[int idx]
+        {
+            get
+            {
+                //to avoid a crash
+                try
+                {
+                    return String[idx - 1].ToString();
+                }
+                catch
+                {
+                    return "";
+                }
+            }
+        }
+
         public string this[LingoNumber idx] => this[(int) idx];
 
         // I have no idea why this is necessary.

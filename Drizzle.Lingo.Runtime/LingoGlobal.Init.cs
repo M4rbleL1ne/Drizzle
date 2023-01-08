@@ -1,4 +1,4 @@
-﻿using Drizzle.Lingo.Runtime.Scripting;
+using Drizzle.Lingo.Runtime.Scripting;
 
 namespace Drizzle.Lingo.Runtime;
 
@@ -17,6 +17,7 @@ public sealed partial class LingoGlobal
         _key = new Key();
         _mouse = new Mouse();
         _movie = new Movie(this);
+        _player = new Player(this);
         _global = new Global(this);
         ScriptRuntime = new LingoScriptRuntime(this);
     }

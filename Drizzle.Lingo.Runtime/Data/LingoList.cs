@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,6 +50,8 @@ public class LingoList : IEnumerable<object>, ILingoListDuplicate, IEquatable<Li
     }
 
     public object? findpos(object? value) => null;
+
+    public dynamic? getat(LingoNumber index) => this[(int)index];
 
     public void add(object? value)
     {

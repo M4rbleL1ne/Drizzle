@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Dynamic;
 
 namespace Drizzle.Lingo.Runtime;
@@ -28,9 +28,19 @@ public sealed partial class LingoGlobal
 
         public dynamic stage => throw new NotImplementedException();
 
+        public LingoNumber exitlock { get; set; }
+
+        // used in an exportall method, not implemented yet
+        public LingoPropertyList castlib => throw new NotImplementedException();
+
         public void go(LingoNumber newFrame)
         {
             // score not implemented.
+        }
+
+        public void halt()
+        {
+            // nothing
         }
     }
 

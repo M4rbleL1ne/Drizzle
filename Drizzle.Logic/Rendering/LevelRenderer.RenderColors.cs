@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Drizzle.Lingo.Runtime;
 
 namespace Drizzle.Logic.Rendering;
@@ -43,155 +43,193 @@ public sealed partial class LevelRenderer
 
             var getColor = finalImage.getpixel(q, c);
 
-            if (getColor.GreenByte is > 7 and < 11)
+            if (getColor != LingoColor.White)
             {
-            }
-            else if (getColor == new LingoColor(0, 11, 0))
-            {
-                finalImage.setpixel(q, c, new LingoColor(10, 0, 0));
-            }
-            else
-            {
-                if (getColor == LingoColor.White)
-                    layer = 0;
-
-                var lowResDepth = dptsL.getpos(dpImage.getpixel(q, c));
-                var fgDp = fogDptsL.getpos(fogImage.getpixel(q, c));
-
-                var fogFac = (255 - fogImage.getpixel(q, c).RedByte) / 255.0f;
-                fogFac = (fogFac - 0.0275f) / 0.9411f;
-                var rainBowFac = 0f;
-
-                if (fogFac <= 0.2f)
+                if (getColor.GreenByte is > 7 and < 11)
                 {
-                    foreach (var (dpX, dpY) in FogDisplacements)
-                    {
-                        var dpQ = Math.Clamp(q + dpX, 0, 1339);
-                        var dpC = Math.Clamp(c + dpY, 0, 799);
-                        var otherFogFac = (255 - fogImage.getpixel(dpQ, dpC).RedByte) / 255.0f;
-                        otherFogFac = (otherFogFac - 0.0275f) / 0.9411f;
-                        if (Math.Abs(fogFac - otherFogFac) > 0.0333f)
-                        {
-                            rainBowFac += Math.Clamp(fogFac - otherFogFac, 0, 1) + 1;
-                            if (rainBowFac > 5)
-                                break;
-                        }
-                    }
                 }
-
-                LingoColor col = default;
-
-                var palCol = 2;
-                var effectColor = 0;
-                var dark = 0;
-
-                var getColPacked = getColor.BitPack;
-                if (getColPacked == new LingoColor(255, 0, 0).BitPack)
+                else if (getColor == new LingoColor(0, 11, 0))
                 {
-                    palCol = 1;
-                }
-                else if (getColPacked == new LingoColor(0, 255, 0).BitPack)
-                {
-                    palCol = 2;
-                }
-                else if (getColPacked == new LingoColor(0, 0, 255).BitPack)
-                {
-                    palCol = 3;
-                }
-                else if (getColPacked == new LingoColor(255, 0, 255).BitPack)
-                {
-                    palCol = 2;
-                    effectColor = 1;
-                }
-                else if (getColPacked == new LingoColor(0, 255, 255).BitPack)
-                {
-                    palCol = 2;
-                    effectColor = 2;
-                }
-                else if (getColPacked == new LingoColor(150, 0, 0).BitPack)
-                {
-                    palCol = 1;
-                    dark = 1;
-                }
-                else if (getColPacked == new LingoColor(0, 150, 0).BitPack)
-                {
-                    palCol = 2;
-                    dark = 1;
-                }
-                else if (getColPacked == new LingoColor(0, 0, 150).BitPack)
-                {
-                    palCol = 3;
-                    dark = 1;
-                }
-
-                if (getColor.GreenByte == 255 && getColor.BlueByte == 150)
-                {
-                    palCol = 1;
-                    effectColor = 3;
-                }
-
-                col.RedByte = (byte)(((palCol - 1) * 30) + fgDp);
-
-                if (shadowImage.getpixel(q, c) != default)
-                {
-                    col.RedByte += 90;
-                }
-
-                var greenCol = effectColor;
-
-                if (rainBowFac > 5)
-                {
-                    greenCol += 4;
-                    RainbowifyPixel((q, c));
-                }
-                else if (rainBowMask.getpixel(q, c) != LingoColor.White)
-                {
-                    greenCol += 4;
-                }
-
-                if (effectColor > 0)
-                {
-                    if (effectColor == 3)
-                    {
-                        col.BlueByte = getColor.RedByte;
-                    }
-                    else
-                    {
-                        var gradient = effectColor == 1 ? flattenedGradientA : flattenedGradientB;
-                        col.BlueByte = (byte)(255 - gradient.getpixel(q, c).RedByte);
-                    }
+                    finalImage.setpixel(q, c, new LingoColor(10, 0, 0));
                 }
                 else
                 {
-                    if (gAnyDecals)
-                    {
-                        var dcGet = finalDecalImage.getpixel(q, c);
-                        if (dcGet != LingoColor.White && dcGet != default)
-                        {
-                            if (dcGet == Movie.gPEcolors[1][2])
-                            {
-                                if (!DoesGreenValueMeanRainbow(greenCol))
-                                    greenCol += 4;
-                            }
-                            else
-                            {
-                                var decalColor = (int) gDecalColors.getpos(dcGet);
-                                if (decalColor == 0 && gDecalColors.count < 255)
-                                {
-                                    gDecalColors.add(dcGet);
-                                    decalColor = (int) gDecalColors.count;
-                                }
+                    if (getColor == LingoColor.White)
+                        layer = 0;
 
-                                col.BlueByte = (byte)(256 - decalColor);
-                                greenCol += 8;
+                    var lowResDepth = dptsL.getpos(dpImage.getpixel(q, c));
+                    var fgDp = fogDptsL.getpos(fogImage.getpixel(q, c));
+
+                    var fogFac = (255 - fogImage.getpixel(q, c).RedByte) / 255.0f;
+                    fogFac = (fogFac - 0.0275f) / 0.9411f;
+                    var rainBowFac = 0f;
+
+                    if (fogFac <= 0.2f)
+                    {
+                        foreach (var (dpX, dpY) in FogDisplacements)
+                        {
+                            var dpQ = Math.Clamp(q + dpX, 0, 1339);
+                            var dpC = Math.Clamp(c + dpY, 0, 799);
+                            var otherFogFac = (255 - fogImage.getpixel(dpQ, dpC).RedByte) / 255.0f;
+                            otherFogFac = (otherFogFac - 0.0275f) / 0.9411f;
+                            if (Math.Abs(fogFac - otherFogFac) > 0.0333f)
+                            {
+                                rainBowFac += Math.Clamp(fogFac - otherFogFac, 0, 1) + 1;
+                                if (rainBowFac > 5)
+                                    break;
                             }
                         }
                     }
+
+                    LingoColor col = default;
+
+                    var palCol = 2;
+                    var effectColor = 0;
+                    var dark = 0;
+
+                    var getColPacked = getColor.BitPack;
+                    if (getColPacked == new LingoColor(255, 0, 0).BitPack)
+                    {
+                        palCol = 1;
+                    }
+                    else if (getColPacked == new LingoColor(0, 255, 0).BitPack)
+                    {
+                        palCol = 2;
+                    }
+                    else if (getColPacked == new LingoColor(0, 0, 255).BitPack)
+                    {
+                        palCol = 3;
+                    }
+                    else if (getColPacked == new LingoColor(255, 0, 255).BitPack)
+                    {
+                        palCol = 2;
+                        effectColor = 1;
+                    }
+                    else if (getColPacked == new LingoColor(0, 255, 255).BitPack)
+                    {
+                        palCol = 2;
+                        effectColor = 2;
+                    }
+                    else if (getColPacked == new LingoColor(150, 0, 0).BitPack)
+                    {
+                        palCol = 1;
+                        dark = 1;
+                    }
+                    else if (getColPacked == new LingoColor(0, 150, 0).BitPack)
+                    {
+                        palCol = 2;
+                        dark = 1;
+                    }
+                    else if (getColPacked == new LingoColor(0, 0, 150).BitPack)
+                    {
+                        palCol = 3;
+                        dark = 1;
+                    }
+                    else if (getColPacked == new LingoColor(150, 0, 150).BitPack)
+                    {
+                        palCol = 1;
+                        effectColor = 1;
+                    }
+                    else if (getColPacked == new LingoColor(0, 150, 150).BitPack)
+                    {
+                        palCol = 1;
+                        effectColor = 2;
+                    }
+                    else if (getColPacked == new LingoColor(255, 150, 255).BitPack)
+                    {
+                        palCol = 3;
+                        effectColor = 1;
+                    }
+                    else if (getColPacked == new LingoColor(150, 255, 255).BitPack)
+                    {
+                        palCol = 3;
+                        effectColor = 2;
+                    }
+
+                    if (getColor.GreenByte == 255 && getColor.BlueByte == 150)
+                    {
+                        palCol = 1;
+                        effectColor = 3;
+                    }
+
+                    col.RedByte = (byte)(((palCol - 1) * 30) + fgDp);
+
+                    if (shadowImage.getpixel(q, c) != default)
+                    {
+                        col.RedByte += 90;
+                    }
+
+                    var greenCol = effectColor;
+
+                    if (grimeActive)
+                    {
+                        if (rainBowFac > 5)
+                        {
+                            if (grimeOnGradients || (greenCol != 1 && greenCol != 2 && greenCol != 3))
+                            {
+                                greenCol += 4;
+                                RainbowifyPixel((q, c));
+                            }
+                        }
+                        else if (rainBowMask.getpixel(q, c) != LingoColor.White)
+                        {
+                            if (grimeOnGradients || (greenCol != 1 && greenCol != 2 && greenCol != 3))
+                                greenCol += 4;
+                        }
+                    }
+
+                    if (effectColor > 0)
+                    {
+                        if (effectColor == 3)
+                        {
+                            col.BlueByte = getColor.RedByte;
+                        }
+                        else
+                        {
+                            var gradient = effectColor == 1 ? flattenedGradientA : flattenedGradientB;
+                            col.BlueByte = (byte)(255 - gradient.getpixel(q, c).RedByte);
+                        }
+                        if (col.BlueByte >= 255 && bkgFix)
+                            col.BlueByte = 254;
+                    }
+                    else
+                    {
+                        if (gAnyDecals)
+                        {
+                            var dcGet = finalDecalImage.getpixel(q, c);
+                            if (dcGet != LingoColor.White && dcGet != default)
+                            {
+                                if (dcGet == Movie.gPEcolors[1][2])
+                                {
+                                    if (grimeActive && (grimeOnGradients || (greenCol != 1 && greenCol != 2 && greenCol != 3)))
+                                    {
+                                        if (!DoesGreenValueMeanRainbow(greenCol))
+                                            greenCol += 4;
+                                    }
+                                }
+                                else
+                                {
+                                    var decalColor = (int)gDecalColors.getpos(dcGet);
+                                    if (decalColor == 0 && gDecalColors.count < 255)
+                                    {
+                                        gDecalColors.add(dcGet);
+                                        decalColor = (int)gDecalColors.count;
+                                    }
+
+                                    if (bkgFix && decalColor < 2)
+                                        decalColor = 2;
+
+                                    col.BlueByte = (byte)(256 - decalColor);
+                                    greenCol += 8;
+                                }
+                            }
+                        }
+                    }
+
+                    col.GreenByte = (byte)(greenCol + dark * 16);
+
+                    finalImage.setpixel(q, c, layer == 0 ? LingoColor.White : col);
                 }
-
-                col.GreenByte = (byte)(greenCol + dark * 16);
-
-                finalImage.setpixel(q, c, layer == 0 ? LingoColor.White : col);
             }
         }
 

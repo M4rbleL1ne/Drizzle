@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -20,7 +20,9 @@ public sealed class LingoCastViewerViewModel : ViewModelBase
     private static readonly string[] CastsToLoad =
     {
         "Internal",
-        "levelEditor"
+        "levelEditor",
+        "Drought",
+        "Dry Editor"
     };
 
     private readonly ILingoRuntimeManager _lingo;
